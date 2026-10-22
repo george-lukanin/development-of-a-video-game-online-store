@@ -4,9 +4,7 @@
 
 namespace game_store
 {
-
-    Cart::Cart(std::string_view ownerName)
-        : m_ownerName{ ownerName }
+    Cart::Cart(std::string_view ownerName) : m_ownerName{ ownerName }
     {
         std::cout << "Создана корзина покупателя: " << m_ownerName << '\n';
     }
@@ -33,8 +31,7 @@ namespace game_store
             }
         }
 
-        m_items[m_itemCount] = &game;
-        ++m_itemCount;
+        m_items[m_itemCount++] = &game;
 
         std::cout << "Игра \"" << game.GetTitle() << "\" добавлена в корзину.\n";
 
@@ -52,11 +49,9 @@ namespace game_store
                     m_items[j] = m_items[j + 1];
                 }
 
-                m_items[m_itemCount - 1] = nullptr;
-                --m_itemCount;
+                m_items[--m_itemCount] = nullptr;
 
                 std::cout << "Игра \"" << game.GetTitle() << "\" удалена из корзины.\n";
-
                 return true;
             }
         }
@@ -67,7 +62,8 @@ namespace game_store
 
     void Cart::PrintContents() const
     {
-        std::cout << "Содержимое корзины покупателя " << m_ownerName << ":\n";
+        std::cout << "Содержимое корзины покупателя "
+            << m_ownerName << ":\n";
 
         if (m_itemCount == 0)
         {
@@ -97,5 +93,4 @@ namespace game_store
     {
         return m_itemCount;
     }
-
-} // namespace game_store
+}

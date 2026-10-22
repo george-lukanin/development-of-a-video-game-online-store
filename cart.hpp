@@ -2,25 +2,24 @@
 
 #include "videogame.hpp"
 
+#include <array>
 #include <cstddef>
 #include <string>
 #include <string_view>
 
 namespace game_store
 {
-
     class Cart
     {
     private:
-        static constexpr std::size_t MAX_ITEMS = 10;
+        static const std::size_t MAX_ITEMS = 10;
 
         std::string m_ownerName{};
-        VideoGame* m_items[MAX_ITEMS]{};
+        std::array<VideoGame*, MAX_ITEMS> m_items{};
         std::size_t m_itemCount{};
 
     public:
-        explicit Cart(std::string_view ownerName);
-
+        Cart(std::string_view ownerName);
         ~Cart();
 
         Cart(const Cart&) = delete;
@@ -33,5 +32,4 @@ namespace game_store
         [[nodiscard]] double CalculateTotal() const;
         [[nodiscard]] std::size_t GetItemCount() const;
     };
-
-} // namespace game_store
+}
