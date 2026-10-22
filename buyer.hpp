@@ -7,7 +7,6 @@
 
 namespace game_store
 {
-
     class Buyer
     {
     private:
@@ -15,8 +14,7 @@ namespace game_store
         Cart m_cart;
 
     public:
-        explicit Buyer(std::string_view name);
-
+        Buyer(std::string_view name);
         ~Buyer();
 
         bool AddGameToCart(VideoGame& game);
@@ -28,5 +26,4 @@ namespace game_store
         [[nodiscard]] Cart& GetCart();
         [[nodiscard]] std::string_view GetName() const;
     };
-
-} // namespace game_store
+}

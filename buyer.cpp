@@ -4,10 +4,7 @@
 
 namespace game_store
 {
-
-    Buyer::Buyer(std::string_view name)
-        : m_name{ name }
-        , m_cart{ name }
+    Buyer::Buyer(std::string_view name) : m_name{ name }, m_cart{ name }
     {
         std::cout << "Создан покупатель: " << m_name << '\n';
     }
@@ -53,5 +50,4 @@ namespace game_store
     {
         return m_name;
     }
-
-} // namespace game_store
+}

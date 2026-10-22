@@ -5,7 +5,6 @@
 
 namespace game_store
 {
-
     class VideoGame
     {
     private:
@@ -15,6 +14,7 @@ namespace game_store
 
     public:
         VideoGame(std::string_view title, std::string_view genre, double price);
+
         VideoGame();
 
         ~VideoGame();
@@ -26,5 +26,4 @@ namespace game_store
         void ChangePrice(double newPrice);
         void PrintInfo() const;
     };
-
-} // namespace game_store
+}

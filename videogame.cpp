@@ -4,13 +4,7 @@
 
 namespace game_store
 {
-
-    VideoGame::VideoGame(
-        std::string_view title,
-        std::string_view genre, double price)
-        : m_title{ title }
-        , m_genre{ genre }
-        , m_price{ price }
+    VideoGame::VideoGame(std::string_view title, std::string_view genre, double price) : m_title{ title }, m_genre{ genre }, m_price{ price }
     {
         if (price < 0.0)
         {
@@ -21,12 +15,8 @@ namespace game_store
         std::cout << "Создана видеоигра: " << m_title << '\n';
     }
 
-    VideoGame::VideoGame()
-        : m_title{ "Unknown" }
-        , m_genre{ "Unknown" }
-        , m_price{}
+    VideoGame::VideoGame() : VideoGame("Unknown", "Unknown", 0.0)
     {
-        std::cout << "Создана видеоигра: " << m_title << '\n';
     }
 
     VideoGame::~VideoGame()
@@ -66,5 +56,4 @@ namespace game_store
     {
         std::cout << "Игра: " << m_title << ", жанр: " << m_genre << ", цена: " << m_price << '\n';
     }
-
-} // namespace game_store
+}
