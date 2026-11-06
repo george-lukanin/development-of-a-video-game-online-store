@@ -1,9 +1,10 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace game_store
 {
@@ -11,125 +12,91 @@ namespace game_store
     {
         static void Main()
         {
-            Console.WriteLine("===== Композиция =====");
+            Console.WriteLine("===== Создание объектов =====");
 
+            OfflineVideoGame game1 = new OfflineVideoGame("Half-Life 2", "FPS", 399.0);
+
+            OnlineVideoGame game2 = new OnlineVideoGame("Team Fortress 2", "FPS", 0.0);
+
+            OnlineVideoGame game3 = new OnlineVideoGame();
+
+            Console.WriteLine("\n===== Работа через базовый класс =====");
+
+            List<BaseVideoGame> games = new List<BaseVideoGame> { game1, game2 };
+
+            foreach (BaseVideoGame game in games)
             {
-                Buyer buyer = new Buyer("Иван");
-                VideoGame game = new VideoGame("Half-Life 2", "FPS", 399.0);
-
-                Console.WriteLine("\nДобавление игры в корзину:");
-                buyer.AddGameToCart(game);
-
-                Console.WriteLine("\nСостояние покупателя:");
-                buyer.PrintProfile();
-
-                Console.WriteLine("\nОформление заказа:");
-                buyer.Checkout();
-
-                Console.WriteLine("\nВыход из блока.");
+                game.PrintInfo();
+                Console.WriteLine();
             }
 
-            Console.WriteLine("\nЛокальные переменные блока больше не используются.");
+            Console.WriteLine("\n===== Глубокое копирование =====");
 
-            Console.WriteLine("\n===== Агрегация =====");
+            OfflineVideoGame copiedGame = new OfflineVideoGame(game1);
 
-            VideoGame externalGame = new VideoGame("The Witcher 3", "RPG", 1499.0);
+            copiedGame.ChangePrice(50);
 
-            {
-                Cart cart = new Cart("Внешний покупатель");
-                cart.AddGame(externalGame);
+            Console.WriteLine("Оригинал: " + game1);
+            Console.WriteLine("Копия: " + copiedGame);
 
-                Console.WriteLine("\nСостояние корзины:");
-                cart.PrintContents();
+            Console.WriteLine("\n===== Поверхностное копирование =====");
 
-                Console.WriteLine("\nВыход из блока с корзиной.");
-            }
+            BaseVideoGame shallowCopy = game1.ShallowCopy();
 
-            Console.WriteLine("\nИгра продолжает существовать после выхода из блока:");
-            externalGame.PrintInfo();
+            shallowCopy.ChangeDescription("Изменённое общее описание");
 
-            Console.WriteLine("\n===== Проверка правил =====");
+            Console.WriteLine("Оригинал: ");
 
-            Cart ruleCart = new Cart("Покупатель проверки");
-            VideoGame ruleGame = new VideoGame("Doom", "Shooter", 999.0);
+            game1.PrintInfo();
 
-            Console.WriteLine("\nПервое добавление:");
-            ruleCart.AddGame(ruleGame);
+            Console.WriteLine("Поверхностная копия: ");
 
-            Console.WriteLine("\nПовторное добавление той же игры:");
-            ruleCart.AddGame(ruleGame);
+            shallowCopy.PrintInfo();
 
-            Console.WriteLine("\nПопытка установить отрицательную цену:");
-            ruleGame.ChangePrice(-100.0);
+            Console.WriteLine("\n===== Глубокое копирование =====");
 
-            Console.WriteLine("\nКорректное изменение цены:");
-            ruleGame.ChangePrice(799.0);
-            ruleGame.PrintInfo();
+            BaseVideoGame deepCopy = game1.Clone();
 
-            Console.WriteLine("\n===== Ссылки и копии объектов =====");
+            deepCopy.ChangePrice(100);
 
-            VideoGame first = new VideoGame("Terraria", "Sandbox", 399.0);
-            VideoGame second = first;
+            Console.WriteLine("Оригинал: " + game1);
+            Console.WriteLine("Клон: " + deepCopy);
 
-            Console.WriteLine("До изменения:");
-            Console.WriteLine($"first:  {first}");
-            Console.WriteLine($"second: {second}");
+            Console.WriteLine("\n===== Работа со строками =====");
 
-            second.ChangePrice(799.0);
+            game1.ProcessTitle();
 
-            Console.WriteLine("После изменения через second:");
-            Console.WriteLine($"first:  {first}");
-            Console.WriteLine($"second: {second}");
+            Console.WriteLine("\n===== Сравнение объектов =====");
 
-            Console.WriteLine("Обе переменные ссылаются на один объект.");
+            OfflineVideoGame anotherGame = new OfflineVideoGame("Minecraft", "Sandbox", 29.99);
 
-            Console.WriteLine("\n===== Копирование структуры =====");
+            Console.WriteLine($"Объекты равны: {game1.Equals(anotherGame)}");
 
-            GameSnapshot snapshot1 = new GameSnapshot("Portal", 199.0);
+            Console.WriteLine($"HashCode оригинала: {game1.GetHashCode()}");
 
-            GameSnapshot snapshot2 = snapshot1;
-            snapshot2.Price = 399.0;
+            Console.WriteLine($"HashCode копии: {anotherGame.GetHashCode()}");
 
-            Console.WriteLine($"snapshot1: {snapshot1}");
-            Console.WriteLine($"snapshot2: {snapshot2}");
+            Console.WriteLine("\n===== This и передача объекта =====");
 
-            Console.WriteLine("Изменение копии структуры не изменило исходную.");
+            List<BaseVideoGame> collection = new List<BaseVideoGame>();
 
-            Console.WriteLine("\n===== Освобождение ресурса через using =====");
+            game1.AddToCollection(collection);
 
-            using (ResourceJournal journal = new ResourceJournal())
-            {
-                journal.Write("Покупатель получил игру.");
-                Console.WriteLine("Внутри блока using.");
-            }
+            Console.WriteLine($"Количество игр: {collection.Count}");
 
-            Console.WriteLine("После блока using.");
+            Console.WriteLine("\n===== Статическое поле =====");
 
-            Console.WriteLine("\n===== Сборщик мусора =====");
+            Console.WriteLine($"Количество объектов: {BaseVideoGame.GetObjectCount()}");
 
-            WeakReference<VideoGame> weakGame = CreateUnreferencedGame();
+            Console.WriteLine("\n===== using var =====");
 
-            Console.WriteLine($"До GC объект доступен: {weakGame.TryGetTarget(out _)}");
+            using var writer = new StringWriter();
 
-            Console.WriteLine("Вызывается сборщик мусора. Финализатор может выполниться позже.");
+            writer.WriteLine(game1.ToString());
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            Console.WriteLine(writer.ToString());
 
-            Console.WriteLine($"После GC объект доступен: {weakGame.TryGetTarget(out _)}");
-
-            Console.WriteLine("Сборка мусора не привязана к выходу из блока.");
-
-            Console.WriteLine("\n===== Завершение программы =====");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static WeakReference<VideoGame> CreateUnreferencedGame()
-        {
-            VideoGame game = new VideoGame("Временная игра", "Test", 100.0);
-
-            return new WeakReference<VideoGame>(game);
+            Console.WriteLine("\n===== Конец программы =====");
         }
     }
 }
