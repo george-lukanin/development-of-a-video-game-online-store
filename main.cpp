@@ -1,9 +1,9 @@
-#include "buyer.hpp"
-#include "cart.hpp"
-#include "videogame.hpp"
+п»ї#include "offlinevideogame.hpp"
+#include "onlinevideogame.hpp"
 
 #include <iostream>
 #include <windows.h>
+#include <vector>
 
 using namespace game_store;
 
@@ -12,144 +12,93 @@ int main()
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
 
-    std::cout << "===== Композиция =====\n";
+    std::cout << "===== РЎРѕР·РґР°РЅРёРµ РѕР±СЉРµРєС‚РѕРІ =====\n";
 
-    {
-        Buyer buyer{ "Иван" };
-        VideoGame game{ "Half-Life 2", "FPS", 399.0 };
+    OfflineVideoGame game1("Half-Life 2", "FPS", 399.0);
 
-        buyer.AddGameToCart(game);
-        buyer.PrintProfile();
-        buyer.Checkout();
+    OnlineVideoGame game2("Team Fortress 2", "FPS", 0.0);
 
-        std::cout << "Выход из блока композиции.\n";
-    }
+    OnlineVideoGame game3;
 
-    std::cout << "\n===== Агрегация =====\n";
+    std::cout << "\n===== Р Р°Р±РѕС‚Р° С‡РµСЂРµР· Р±Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ =====\n";
 
-    VideoGame externalGame{ "The Witcher 3", "RPG", 1499.0 };
+    std::unique_ptr<BaseVideoGame> games[] = { std::make_unique<OfflineVideoGame>(game1), std::make_unique<OnlineVideoGame>(game2) };
 
-    {
-        Cart cart{ "Внешний покупатель" };
-        cart.AddGame(externalGame);
-        cart.PrintContents();
-
-        std::cout << "Выход из блока агрегации.\n";
-    }
-
-    externalGame.PrintInfo();
-
-    std::cout << "\n===== Проверка правил =====\n";
-
-    Cart ruleCart{ "Покупатель проверки" };
-    VideoGame ruleGame{ "Doom", "Shooter", 999.0 };
-
-    ruleCart.AddGame(ruleGame);
-    ruleCart.AddGame(ruleGame);
-    ruleGame.ChangePrice(-100.0);
-    ruleGame.ChangePrice(799.0);
-
-    std::cout << "\n===== unique_ptr: единственный владелец =====\n";
-
-    {
-        auto game = std::make_unique<VideoGame>("Cyberpunk 2077", "RPG", 1499.0);
-
-        game->PrintInfo();
-        std::cout << "Выход из блока: unique_ptr удалит игру.\n";
-    }
-
-    std::cout << "Блок завершён.\n";
-
-    std::cout << "\n===== unique_ptr: передача владения =====\n";
-
-    auto original = std::make_unique<VideoGame>("Terraria", "Sandbox", 399.0);
-
-    auto recipient = std::move(original);
-
-    std::cout << "Исходный указатель пуст: " << std::boolalpha << (original == nullptr) << '\n';
-
-    recipient->PrintInfo();
-
-    std::cout << "\n===== shared_ptr: совместное владение =====\n";
-
-    std::shared_ptr<VideoGame> sharedGame;
-
-    {
-        auto owner1 = std::make_shared<VideoGame>("Stardew Valley", "Simulator", 799.0);
-
-        std::cout << "После создания: " << owner1.use_count() << '\n';
-
-        {
-            auto owner2 = owner1;
-
-            std::cout << "После копирования: " << owner1.use_count() << '\n';
-
-            owner2->ChangePrice(899.0);
-            owner2->PrintInfo();
-
-            sharedGame = owner2;
-
-            std::cout << "После создания ещё одного владельца: " << owner1.use_count() << '\n';
-        }
-
-        std::cout << "После уничтожения owner2: " << owner1.use_count() << '\n';
-    }
-
-    std::cout << "После выхода owner1: " << sharedGame.use_count() << '\n';
-
-    sharedGame.reset();
-    std::cout << "Последний владелец уничтожен.\n";
-
-    std::cout << "\n===== weak_ptr: наблюдение без владения =====\n";
-
-    std::weak_ptr<VideoGame> weakGame;
-
-    {
-        auto owner = std::make_shared<VideoGame>("Portal 2", "Puzzle", 399.0);
-
-        weakGame = owner;
-
-        if (auto locked = weakGame.lock())
-        {
-            std::cout << "Объект доступен через lock():\n";
-            locked->PrintInfo();
-        }
-    }
-
-    if (auto locked = weakGame.lock())
-    {
-        locked->PrintInfo();
-    }
-
-    else
-    {
-        std::cout << "lock() вернул пустой указатель: объект уничтожен.\n";
-    }
-
-    std::cout << "\n===== Динамический массив объектов =====\n";
-
-    auto gameArray = std::make_unique<VideoGame[]>(2);
-
-    gameArray[0].ChangePrice(699.0);
-    gameArray[1].ChangePrice(499.0);
-
-    gameArray[0].PrintInfo();
-    gameArray[1].PrintInfo();
-
-    std::cout << "Выход из блока массива освободит оба объекта.\n";
-
-    std::cout << "\n===== Массив динамических объектов =====\n";
-
-    std::array<std::unique_ptr<VideoGame>, 2> dynamicGames{std::make_unique<VideoGame>("Stardew Valley", "Simulator", 799.0), std::make_unique<VideoGame>("Portal 2", "Puzzle", 399.0)};
-
-    for (const auto& game : dynamicGames)
+    for (const auto& game : games)
     {
         game->PrintInfo();
+        std::cout << '\n';
     }
 
-    std::cout << "При выходе из main элементы unique_ptr освободят игры.\n";
+    std::cout << "\n===== РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ =====\n";
 
-    std::cout << "\n===== Конец программы =====\n";
+    OfflineVideoGame copiedGame(game1);
+
+    copiedGame.ChangePrice(299.0);
+
+    std::cout << "РћСЂРёРіРёРЅР°Р»: ";
+    game1.PrintInfo();
+
+    std::cout << "РљРѕРїРёСЏ: ";
+    copiedGame.PrintInfo();
+
+    std::cout << "\n===== РџРѕРІРµСЂС…РЅРѕСЃС‚РЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ =====\n";
+
+    OfflineVideoGame shallowCopy("Doom", "Shooter", 999.0);
+
+    game1.ShareDescriptionWith(shallowCopy);
+
+    std::cout << "РћРїРёСЃР°РЅРёРµ РѕСЂРёРіРёРЅР°Р»Р°: " << game1.GetDescription() << '\n';
+
+    shallowCopy.ShareDescriptionWith(game1);
+
+    std::cout << "РћР±С‰РµРµ РѕРїРёСЃР°РЅРёРµ: " << shallowCopy.GetDescription() << '\n';
+
+    std::cout << "\n===== Р“Р»СѓР±РѕРєРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ =====\n";
+
+    auto deepCopy = game1.Clone();
+
+    deepCopy->ChangePrice(899.0);
+
+    std::cout << "РћСЂРёРіРёРЅР°Р»: ";
+    game1.PrintInfo();
+
+    std::cout << "Р“Р»СѓР±РѕРєР°СЏ РєРѕРїРёСЏ: ";
+    deepCopy->PrintInfo();
+
+    std::cout << "\n===== РџРµСЂРµРјРµС‰РµРЅРёРµ =====\n";
+
+    OfflineVideoGame moveSource("Cyberpunk 2077", "RPG", 1499.0);
+
+    OfflineVideoGame movedGame(std::move(moveSource));
+
+    movedGame.PrintInfo();
+
+    std::cout << "\n===== Р Р°Р±РѕС‚Р° СЃРѕ СЃС‚СЂРѕРєР°РјРё =====\n";
+
+    game1.ProcessTitle();
+
+    std::cout << "\n===== This Рё РїРµСЂРµРґР°С‡Р° РѕР±СЉРµРєС‚Р° =====\n";
+
+    std::vector<const BaseVideoGame*> collection;
+
+    game1.AddToCollection(collection);
+
+    std::cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ РёРіСЂ РІ РєРѕР»Р»РµРєС†РёРё: " << collection.size() << '\n';
+
+    std::cout << "\n===== РЎС‚Р°С‚РёС‡РµСЃРєРѕРµ РїРѕР»Рµ =====\n";
+
+    std::cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±СЉРµРєС‚РѕРІ: " << BaseVideoGame::GetObjectCount() << '\n';
+
+    std::cout << "\n===== РЈРЅРёС‡С‚РѕР¶РµРЅРёРµ С‡РµСЂРµР· СѓРєР°Р·Р°С‚РµР»СЊ =====\n";
+
+    std::unique_ptr<BaseVideoGame> polymorphicGame = std::make_unique<OnlineVideoGame>("Terraria", "Sandbox", 399.0);
+
+    polymorphicGame->PrintInfo();
+
+    polymorphicGame.reset();
+
+    std::cout << "\n===== РљРѕРЅРµС† РїСЂРѕРіСЂР°РјРјС‹ =====\n";
 
     return 0;
 }
